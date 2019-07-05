@@ -1,0 +1,36 @@
+- hosts: nxos_switch
+  gather_facts: false
+  connection: network_cli
+  vars:
+    backup_folder: "{{ playbook_dir}}/backups"
+    config_folder: "{{ backup_folder}}/config"
+    show_ver_folder: "{{ backup_folder}}/sh_ver"
+  tasks:
+    - name: Ensure backup folders exists
+      delegate_to: localhost
+      run_once: true
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ backup_folder }}"
+        - "{{ config_folder }}"
+        - "{{ show_ver_folder}}"
+
+    - name: Backup NXOS Config
+      nxos_config:
+        backup: True
+        backup_options:
+          filename: "{{ inventory_hostname }}.cfg"
+          dir_path: "{{ config_folder }}"
+
+    - name: Show Version
+      nxos_command:
+        commands:
+          - show version
+      register: show_version
+
+    - name: Save text output of show ver
+      copy:
+        content: "{{ show_version }}"
+        dest: "{{ backup_dir }}/sh_ver/{{ inventory_hostname }}.config"
