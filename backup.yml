@@ -1,11 +1,18 @@
-- hosts: nxos_switch
+- hosts: nxos
   gather_facts: false
   connection: network_cli
   vars:
-    backup_folder: "{{ playbook_dir}}/backups"
-    config_folder: "{{ backup_folder}}/config"
-    show_ver_folder: "{{ backup_folder}}/sh_ver"
+    backup_folder: "{{ playbook_dir }}/backups"
+    config_folder: "{{ backup_folder }}/config"
+    show_ver_folder: "{{ backup_folder }}/sh_ver"
+    show_clock_folder: "{{ backup_folder }}/sh_clock"
+
+  pre_task:
+    - set_fact:
+        timestamp: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+
   tasks:
+
     - name: Ensure backup folders exists
       delegate_to: localhost
       run_once: true
@@ -28,9 +35,11 @@
       nxos_command:
         commands:
           - show version
+          - show clock
+          - show ntp status
       register: show_version
 
     - name: Save text output of show ver
       copy:
         content: "{{ show_version }}"
-        dest: "{{ show_ver_folder }}/{{ inventory_hostname }}.config"
+        dest: "{{ show_ver_folder }}/{{ inventory_hostname }}-{{ timestamp }}.config"
