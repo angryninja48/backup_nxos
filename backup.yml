@@ -15,7 +15,7 @@
       loop:
         - "{{ backup_folder }}"
         - "{{ config_folder }}"
-        - "{{ show_ver_folder}}"
+        - "{{ show_ver_folder }}"
 
     - name: Backup NXOS Config
       nxos_config:
@@ -33,4 +33,4 @@
     - name: Save text output of show ver
       copy:
         content: "{{ show_version }}"
-        dest: "{{ backup_dir }}/sh_ver/{{ inventory_hostname }}.config"
+        dest: "{{ show_ver_folder }}/{{ inventory_hostname }}.config"
